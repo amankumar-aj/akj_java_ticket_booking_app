@@ -45,29 +45,7 @@ public class UserBookingService {
             return false;
         }
     }
-
-    // ✅ FIX: **Added missing `loginUser()` method**
-    public boolean loginUser(User loginAttempt) {
-        for (User u : userList) {
-            if (u.getName().equalsIgnoreCase(loginAttempt.getName())
-                    && UserServiceUtil.checkPassword(loginAttempt.getPassword(), u.getHashedPassword())) {
-                this.user = u;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // ✅ FIX: **Added missing `fetchBooking()` method**
-    public void fetchBooking() {
-        if (user == null || user.getTicketsBooked().isEmpty()) {
-            System.out.println("📭 No tickets found.");
-        } else {
-            user.printTickets();
-        }
-    }
-
-    // ✅ FIX: **Added missing `bookTicket()` method**
+//Booking
     public Ticket bookTicket(Scanner scanner) {
         if (user == null) {
             System.out.println("⚠ Please login to book tickets.");
@@ -102,11 +80,11 @@ public class UserBookingService {
 
         Ticket ticket = TicketUtil.createTicket(user, source, destination, travelDate, selectedTrain);
         if (ticket != null) {
-            user.getTicketsBooked().add(ticket);
+            user.getTicketsBooked().add(ticket); // ✅ FIX: Ticket now gets stored properly in user object
             try {
-                saveUsers();
+                saveUsers(); // ✅ FIX: Ensure user profile gets updated
                 System.out.println("✅ Ticket Booked Successfully!");
-                System.out.println(ticket.getTicketInfo()); // ✅ FIX: Ensures ticket details print
+                System.out.println(ticket.getTicketInfo());
             } catch (IOException e) {
                 System.out.println("⚠ Error saving user after booking: " + e.getMessage());
             }
@@ -114,11 +92,53 @@ public class UserBookingService {
 
         return ticket;
     }
-    public boolean cancelBooking(String ticketId) {
-        if (user == null) {
-            System.out.println("⚠ Please login to cancel tickets.");
-            return false;
+//cancel Booking
+public boolean cancelBooking(String ticketId) {
+    if (user == null) {
+        System.out.println("⚠ Please login to cancel tickets.");
+        return false;
+    }
+
+    boolean removedFromUser = user.getTicketsBooked().removeIf(t -> t.getTicketId().equalsIgnoreCase(ticketId)); // ✅ Ensure ticket is removed from user object
+
+    if (!removedFromUser) {
+        System.out.println("❌ Ticket not found in user profile.");
+        return false;
+    }
+
+    try {
+        saveUsers(); // ✅ Fix: Save user profile after ticket removal
+
+        boolean removedFromGlobal = TicketUtil.cancelTicket(ticketId, user); // ✅ Ensure global removal also happens
+        if (removedFromGlobal) {
+            System.out.println("✅ Ticket successfully removed from user profile and system.");
+            return true;
+        } else {
+            System.out.println("⚠ Ticket removed from user but still exists in global storage.");
         }
-        return TicketUtil.cancelTicket(ticketId, user);
+    } catch (IOException e) {
+        System.out.println("⚠ Error updating user profile: " + e.getMessage());
+    }
+
+    return false;
+}
+    //login
+    public boolean loginUser(User loginAttempt) {
+        for (User u : userList) {
+            if (u.getName().equalsIgnoreCase(loginAttempt.getName())
+                    && UserServiceUtil.checkPassword(loginAttempt.getPassword(), u.getHashedPassword())) {
+                this.user = u;
+                return true;
+            }
+        }
+        return false;
+    }
+//fetch booking
+    public void fetchBooking() {
+        if (user == null || user.getTicketsBooked().isEmpty()) {
+            System.out.println("📭 No tickets found.");
+        } else {
+            user.printTickets();
+        }
     }
 }

@@ -1,59 +1,9 @@
 [
   {
-    "userId": "c931c8b5-bf68-4fba-8f1e-1df680bd25a7",
+    "userId": "03013f15-ccda-424a-b29f-7a2c41f05180",
     "name": "aman",
     "password": "aj@123",
-    "hashedPassword": "$2a$10$pOXr//fmJc8Kmx/rz7yWkeqGdq3eA/IkGZfB08XciK9jSRI.A9/AW",
+    "hashedPassword": "$2a$10$ThaCG.hW3kI./vH4BhX6les3X72tSM1PZ1Zhc5VqPQiODH6lvhjE.",
     "ticketsBooked": []
-  },
-  {
-    "userId": "9756a0b6-2fc6-459f-b6f2-33bb0e6be96b",
-    "name": "anuj",
-    "password": "aj@123",
-    "hashedPassword": "$2a$10$i9k.YZH/sBZ1adDJtbe9jOH3oKajXE7JBaOdB.5lnC9kpZ8qACDWe",
-    "ticketsBooked": [
-      {
-        "ticketId": "AJ892183000000",
-        "userId": "9756a0b6-2fc6-459f-b6f2-33bb0e6be96b",
-        "name": "anuj",
-        "source": "Delhi",
-        "destination": "Patna",
-        "dateOfTravel": "2025-05-30",
-        "train": {
-          "trainId": "T001",
-          "trainNo": "12345",
-          "seats": [
-            [
-              1,
-              1,
-              1,
-              1,
-              1
-            ],
-            [
-              1,
-              1,
-              1,
-              1,
-              1
-            ]
-          ],
-          "stations": [
-            "Delhi",
-            "Kanpur",
-            "Prayagraj",
-            "Patna"
-          ],
-          "stationTimes": {
-            "Delhi": "08:00",
-            "Kanpur": "12:00",
-            "Prayagraj": "15:00",
-            "Patna": "18:00"
-          },
-          "trainInfo": "Train ID: T001 | Train No: 12345 | Stations: Delhi → Kanpur → Prayagraj → Patna"
-        },
-        "ticketInfo": "===== IRCTC TICKET DETAILS =====\nTicket ID       : AJ892183000000\nUser ID         : 9756a0b6-2fc6-459f-b6f2-33bb0e6be96b\nPassenger Name  : anuj\nSource          : Delhi\nDestination     : Patna\nDate of Travel  : 2025-05-30\nTrain Details   : Train ID: T001 | Train No: 12345 | Stations: Delhi → Kanpur → Prayagraj → Patna\n"
-      }
-    ]
   }
 ]

@@ -3,8 +3,8 @@ package ticket.booking.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ticket.booking.entities.Ticket;
-import ticket.booking.entities.Train;
 import ticket.booking.entities.User;
+import ticket.booking.entities.Train;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,17 +12,12 @@ import java.util.*;
 
 public class TicketUtil {
 
-    private static final String TICKET_FILE = "tickets.json";
+    private static final String TICKET_FILE = "app/src/main/java/ticket/booking/localDb/tickets.json";
     private static final ObjectMapper mapper = new ObjectMapper();
-
-    private static String generateTicketId() {
-        String random = String.format("%06d", new Random().nextInt(1_000_000));
-        return "AJ" + random + "000000";
-    }
 
     public static void saveTicket(Ticket ticket) throws IOException {
         List<Ticket> existingTickets = loadAllTickets();
-        existingTickets.add(ticket);
+        existingTickets.add(ticket); // ✅ Ticket globally store hoga
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File(TICKET_FILE), existingTickets);
     }
 
@@ -36,16 +31,39 @@ public class TicketUtil {
             return new ArrayList<>();
         }
     }
+    //cancel
 
-    // ✅ FIX: **Added missing `createTicket()` method**
-    public static Ticket createTicket(User user, String source, String destination, String travelDate, Train train) {
+    public static boolean cancelTicket(String ticketId, User user) {
         if (user == null) {
-            System.out.println("⚠ Error: User must be logged in to book a ticket.");
-            return null;
+            System.out.println("⚠ Please login to cancel tickets.");
+            return false;
         }
 
-        Ticket ticket = new Ticket(generateTicketId(), user.getName(), user.getUserId(),
-                source, destination, travelDate, train);
+        List<Ticket> tickets = loadAllTickets();
+        boolean removedFromJson = tickets.removeIf(t -> t.getTicketId().equalsIgnoreCase(ticketId)); // ✅ Ensure removal
+
+        if (!removedFromJson) {
+            System.out.println("❌ Ticket not found in system.");
+            return false;
+        }
+
+        try {
+            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(TICKET_FILE), tickets); // ✅ Fix: Ensure JSON update happens correctly
+            System.out.println("✅ Ticket successfully removed from system.");
+            return true;
+        } catch (IOException e) {
+            System.out.println("⚠ Error updating global ticket storage: " + e.getMessage());
+            return false;
+        }
+    }
+//==========
+    private static String generateTicketId() {
+        String random = String.format("%06d", new Random().nextInt(1_000_000));
+        return "AJ" + random + "000000"; // ✅ Fix: Unique Ticket ID generate karega
+    }
+
+    public static Ticket createTicket(User user, String source, String destination, String travelDate, Train train) {
+        Ticket ticket = new Ticket(generateTicketId(), user.getName(), user.getUserId(), source, destination, travelDate, train);
 
         try {
             saveTicket(ticket);
@@ -55,36 +73,5 @@ public class TicketUtil {
         }
 
         return ticket;
-    }
-
-    public static boolean cancelTicket(String ticketId, User user) {
-        if (user == null) {
-            System.out.println("⚠ Error: User must be logged in to cancel a ticket.");
-            return false;
-        }
-
-        List<Ticket> tickets = loadAllTickets();
-        Optional<Ticket> optionalTicket = tickets.stream()
-                .filter(t -> t.getTicketId().equalsIgnoreCase(ticketId))
-                .findFirst();
-
-        if (optionalTicket.isEmpty()) {
-            System.out.println("❌ Ticket not found.");
-            return false;
-        }
-
-        Ticket ticketToCancel = optionalTicket.get();
-        user.getTicketsBooked().removeIf(t -> t.getTicketId().equalsIgnoreCase(ticketId));
-        tickets.removeIf(t -> t.getTicketId().equalsIgnoreCase(ticketId));
-
-        try {
-            // ✅ Fix: Save updated ticket list after cancellation
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(TICKET_FILE), tickets);
-            System.out.println("✅ Ticket successfully canceled.");
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 }
