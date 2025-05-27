@@ -8,10 +8,9 @@ public class Ticket {
     private String destination;
     private String dateOfTravel;
     private Train train;
-
+    private String ticketInfo;
 
     public Ticket() {}
-
 
     public Ticket(String ticketId, String name, String userId, String source,
                   String destination, String dateOfTravel, Train train) {
@@ -22,30 +21,20 @@ public class Ticket {
         this.destination = destination;
         this.dateOfTravel = dateOfTravel;
         this.train = train;
+        this.ticketInfo = buildTicketInfo();
     }
 
-    // Ticket Details
-    public String getTicketInfo() {
-        return String.format(
-                "===== IRCTC TICKET DETAILS =====\n" +
-                        "Ticket ID       : %s\n" +
-                        "User ID         : %s\n" +
-                        "Passenger Name  : %s\n" +
-                        "Source          : %s\n" +
-                        "Destination     : %s\n" +
-                        "Date of Travel  : %s\n" +
-                        "Train Details   : %s\n",
-                ticketId,
-                userId,
-                name,
-                source,
-                destination,
-                dateOfTravel,
-                (train != null) ? train.toString() : "N/A"
-        );
+    private String buildTicketInfo() {
+        return "===== IRCTC TICKET DETAILS =====\n"
+                + "Ticket ID       : " + ticketId + "\n"
+                + "User ID         : " + userId + "\n"
+                + "Passenger Name  : " + name + "\n"
+                + "Source          : " + source + "\n"
+                + "Destination     : " + destination + "\n"
+                + "Date of Travel  : " + dateOfTravel + "\n"
+                + "Train Details   : " + train.getTrainInfo() + "\n";
     }
 
-    // === Getters ===
     public String getTicketId() {
         return ticketId;
     }
@@ -74,38 +63,11 @@ public class Ticket {
         return train;
     }
 
-    // === Setters ===
-    public void setTicketId(String ticketId) {
-        this.ticketId = ticketId;
+    public String getTicketInfo() {
+        return ticketInfo;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public void setDestination(String destination) {
-        this.destination = destination;
-    }
-
-    public void setDateOfTravel(String dateOfTravel) {
-        this.dateOfTravel = dateOfTravel;
-    }
-
-    public void setTrain(Train train) {
-        this.train = train;
-    }
-//gpt fix --aj
-    // Optional: useful if train.toString() isn't overridden properly
-    @Override
-    public String toString() {
-        return getTicketInfo();
+    public void setTicketInfo(String ticketInfo) {
+        this.ticketInfo = ticketInfo;
     }
 }

@@ -1,86 +1,116 @@
 package ticket.booking;
 
+import ticket.booking.entities.Train;
+import ticket.booking.entities.Ticket;
+import ticket.booking.entities.User;
+import ticket.booking.services.TrainServices;
 import ticket.booking.services.UserBookingService;
+import ticket.booking.util.UserServiceUtil;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class App {
     public static void main(String[] args) {
-        System.out.println("Starting aj's E-Ticketing System✅");
+        System.out.println("=== Welcome to AJ's E-Ticketing System ===");
+
         Scanner sc = new Scanner(System.in);
         int option = 0;
+
+        TrainServices trainServices;
         UserBookingService userBookingService;
-        String loggedInUserId = null;
 
         try {
-            userBookingService = new UserBookingService();
+            trainServices = new TrainServices();
+            userBookingService = new UserBookingService(trainServices, new ArrayList<>()); // ✅ Fixed argument compatibility
         } catch (IOException ex) {
-            System.out.println("❌ Initialization failed.");
+            System.out.println("Error loading data files. Exiting...");
             return;
         }
 
         while (option != 7) {
-            System.out.println("\n===== MAIN MENU =====");
-            System.out.println("1. Sign Up");
+            System.out.println("\n1. Sign Up");
             System.out.println("2. Login");
-            System.out.println("3. Fetch My Bookings");
-            System.out.println("4. Search Train");
+            System.out.println("3. Fetch Bookings");
+            System.out.println("4. Search Trains");
             System.out.println("5. Book Ticket");
             System.out.println("6. Cancel Ticket");
             System.out.println("7. Exit");
-            System.out.print("Enter your choice: ");
-
-            try {
-                option = Integer.parseInt(sc.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number between 1 and 7.");
-                continue;
-            }
+            System.out.print("Choose an option: ");
+            option = sc.nextInt();
+            sc.nextLine(); // clear newline
 
             switch (option) {
-                case 1:
-                    userBookingService.registerUser(sc);
-                    break;
-                case 2:
-                    loggedInUserId = userBookingService.loginUser(sc);
-                    if (loggedInUserId != null) {
-                        System.out.println("✅ Login successful.");
+                case 1 -> {
+                    System.out.print("Enter name: ");
+                    String signUpName = sc.nextLine();
+                    System.out.print("Enter password: ");
+                    String signUpPassword = sc.nextLine();
+
+                    User newUser = new User();
+                    newUser.setName(signUpName);
+                    newUser.setPassword(signUpPassword);
+                    newUser.setUserId(UUID.randomUUID().toString());
+                    newUser.setHashedPassword(UserServiceUtil.hashPassword(signUpPassword));
+
+                    if (userBookingService.signUp(newUser)) {
+                        System.out.println(" Sign-up successful!");
                     } else {
-                        System.out.println("❌ Login failed.");
+                        System.out.println(" Sign-up failed. User may already exist.");
                     }
-                    break;
-                case 3:
-                    if (checkLogin(loggedInUserId)) {
-                        userBookingService.fetchBookings(sc, loggedInUserId);
+                }
+
+                case 2 -> {
+                    System.out.print("Enter name: ");
+                    String loginName = sc.nextLine();
+                    System.out.print("Enter password: ");
+                    String loginPassword = sc.nextLine();
+
+                    User loginUser = new User();
+                    loginUser.setName(loginName);
+                    loginUser.setPassword(loginPassword);
+
+                    if (userBookingService.loginUser(loginUser)) {
+                        System.out.println(" Login successful!");
+                    } else {
+                        System.out.println(" Login failed. Invalid credentials.");
                     }
-                    break;
-                case 4:
-                    userBookingService.searchTrain(sc);
-                    break;
-                case 5:
-                    if (checkLogin(loggedInUserId)) {
-                        userBookingService.bookTicket(sc, loggedInUserId);
+                }
+
+                case 3 -> userBookingService.fetchBooking();
+
+                case 4 -> {
+                    System.out.print("Enter source station: ");
+                    String src = sc.nextLine();
+                    System.out.print("Enter destination station: ");
+                    String dst = sc.nextLine();
+
+                    List<Train> foundTrains = trainServices.searchTrains(src, dst);
+                    if (foundTrains.isEmpty()) {
+                        System.out.println(" No trains found for this route.");
+                    } else {
+                        System.out.println(" Available Trains:");
+                        foundTrains.forEach(train -> System.out.println(train.getTrainInfo()));
                     }
-                    break;
-                case 6:
-                    if (checkLogin(loggedInUserId)) {
-                        userBookingService.cancelTicket(sc, loggedInUserId);
-                    }
-                    break;
-                case 7:
-                    System.out.println("👋 Thank you for using aj's IRCTC.");
-                    break;
-                default:
-                    System.out.println("❌ Invalid option. Try again.");
+                }
+
+                case 5 -> userBookingService.bookTicket(sc);
+
+                case 6 -> {
+                    System.out.print("Enter Ticket ID to cancel: ");
+                    String cancelId = sc.nextLine();
+                    userBookingService.cancelBooking(cancelId);
+                }
+
+                case 7 -> System.out.println(" Exiting... Thank you for using AJ's E-Ticketing System!");
+
+                default -> System.out.println("❗ Invalid option. Try again.");
             }
         }
-    }
 
-    private static boolean checkLogin(String loggedInUserId) {
-        if (loggedInUserId == null) {
-            System.out.println("⚠️ Please login first to use this feature.");
-            return false;
-        }
-        return true;
+        sc.close();
     }
 }

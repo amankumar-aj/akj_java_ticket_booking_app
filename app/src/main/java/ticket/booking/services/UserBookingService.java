@@ -2,130 +2,123 @@ package ticket.booking.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ticket.booking.entities.Ticket;
+import ticket.booking.entities.Train;
 import ticket.booking.entities.User;
+import ticket.booking.util.TicketUtil;
 import ticket.booking.util.UserServiceUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class UserBookingService {
-    private List<User> userList;
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String USER_PATH = "app/src/main/java/ticket/booking/localDb/users.json";
 
-    public UserBookingService() throws IOException {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final TrainServices trainServices;
+    private List<User> userList;
+    private User user;
+
+    public UserBookingService(TrainServices trainServices, List<User> userList) throws IOException {
+        this.trainServices = trainServices;
+        this.userList = userList != null ? userList : new ArrayList<>();
         loadUsers();
     }
 
-    //  Loading user from json and adding to userList
-    public List<User> loadUsers() throws IOException {
-        File users = new File(USER_PATH);
-        if (!users.exists()) {
-            users.getParentFile().mkdirs();
-            users.createNewFile();
-            objectMapper.writeValue(users, List.of());
-        }
-        userList = objectMapper.readValue(users, new TypeReference<List<User>>() {});
-        return userList;
+    private void loadUsers() throws IOException {
+        File file = new File(USER_PATH);
+        if (!file.exists()) return;
+        userList = objectMapper.readValue(file, new TypeReference<List<User>>() {});
     }
 
-    //  Saving userList to users.json
-    private void saveUserListToFile() throws IOException {
-        File usersFile = new File(USER_PATH);
-        objectMapper.writeValue(usersFile, userList);
+    private void saveUsers() throws IOException {
+        objectMapper.writeValue(new File(USER_PATH), userList);
     }
 
-    // Register user
-    public void registerUser(Scanner sc) {
-        System.out.print("Enter name: ");
-        String name = sc.nextLine();
-
-        if (userList.stream().anyMatch(u -> u.getName().equalsIgnoreCase(name))) {
-            System.out.println("❌ User already exists. Please try logging in.");
-            return;
-        }
-
-        System.out.print("Enter password: ");
-        String password = sc.nextLine();
-        String hashedPassword = UserServiceUtil.hashPassword(password);
-        String userId = "USER" + System.currentTimeMillis();
-
-        User newUser = new User(userId, name, hashedPassword);
+    public boolean signUp(User newUser) {
         try {
             userList.add(newUser);
-            saveUserListToFile();
-            System.out.println("✅ Registration successful.");
-        } catch (IOException ex) {
-            System.out.println("❌ Failed to save user data.");
+            saveUsers();
+            return true;
+        } catch (IOException e) {
+            return false;
         }
     }
 
-    // ✅ Login user and return userId if successful
-    public String loginUser(Scanner sc) {
-        System.out.print("Enter username: ");
-        String name = sc.nextLine();
-        System.out.print("Enter password: ");
-        String password = sc.nextLine();
-
-        Optional<User> foundUser = userList.stream()
-                .filter(user -> user.getName().equalsIgnoreCase(name) &&
-                        UserServiceUtil.checkPassword(password, user.getHashedPassword()))
-                .findFirst();
-
-        return foundUser.map(User::getUserId).orElse(null);
-    }
-
-    //  Fetch bookings for the logged-in user
-    public void fetchBookings(Scanner sc, String userId) {
-        Optional<User> user = userList.stream()
-                .filter(u -> u.getUserId().equals(userId))
-                .findFirst();
-
-        if (user.isPresent()) {
-            user.get().printTickets();
-        } else {
-            System.out.println("❌ User not found.");
-        }
-    }
-
-    // 🚧 Placeholder for train search
-    public void searchTrain(Scanner sc) {
-        System.out.println("🚧 Train search functionality is under construction.");
-        // Add logic to load trains.json and filter/search trains
-    }
-
-    // 🚧 Placeholder for booking tickets
-    public void bookTicket(Scanner sc, String userId) {
-        System.out.println("🚧 Ticket booking functionality is under construction.");
-        // Later: collect source, destination, trainId, create Ticket object, add to user
-    }
-    // canceling tickets
-    public void cancelTicket(Scanner sc, String userId) {
-        System.out.print("Enter Ticket ID to cancel: ");
-        String ticketId = sc.nextLine();
-
-        Optional<User> user = userList.stream()
-                .filter(u -> u.getUserId().equals(userId))
-                .findFirst();
-
-        if (user.isEmpty()) {
-            System.out.println("❌ User not found.");
-            return;
-        }
-
-        boolean removed = user.get().cancelTicket(ticketId);
-        if (removed) {
-            try {
-                saveUserListToFile();
-                System.out.println("✅ Ticket cancelled successfully.");
-            } catch (IOException e) {
-                System.out.println("❌ Failed to update tickets.");
+    // ✅ FIX: **Added missing `loginUser()` method**
+    public boolean loginUser(User loginAttempt) {
+        for (User u : userList) {
+            if (u.getName().equalsIgnoreCase(loginAttempt.getName())
+                    && UserServiceUtil.checkPassword(loginAttempt.getPassword(), u.getHashedPassword())) {
+                this.user = u;
+                return true;
             }
-        } else {
-            System.out.println("❌ Ticket not found.");
         }
+        return false;
+    }
+
+    // ✅ FIX: **Added missing `fetchBooking()` method**
+    public void fetchBooking() {
+        if (user == null || user.getTicketsBooked().isEmpty()) {
+            System.out.println("📭 No tickets found.");
+        } else {
+            user.printTickets();
+        }
+    }
+
+    // ✅ FIX: **Added missing `bookTicket()` method**
+    public Ticket bookTicket(Scanner scanner) {
+        if (user == null) {
+            System.out.println("⚠ Please login to book tickets.");
+            return null;
+        }
+
+        System.out.print("Enter source station: ");
+        String source = scanner.nextLine().trim();
+        System.out.print("Enter destination station: ");
+        String destination = scanner.nextLine().trim();
+
+        List<Train> foundTrains = trainServices.searchTrains(source, destination);
+        if (foundTrains.isEmpty()) {
+            System.out.println(" No trains available for the selected route.");
+            return null;
+        }
+
+        System.out.println("\nAvailable Trains:");
+        foundTrains.forEach(train -> System.out.println(train.getTrainInfo()));
+
+        System.out.print("\nEnter Train ID to book: ");
+        String selectedTrainId = scanner.nextLine().trim();
+
+        Train selectedTrain = trainServices.getTrainById(selectedTrainId);
+        if (selectedTrain == null) {
+            System.out.println("❌ Invalid Train ID.");
+            return null;
+        }
+
+        System.out.print("Enter travel date (yyyy-mm-dd): ");
+        String travelDate = scanner.nextLine().trim();
+
+        Ticket ticket = TicketUtil.createTicket(user, source, destination, travelDate, selectedTrain);
+        if (ticket != null) {
+            user.getTicketsBooked().add(ticket);
+            try {
+                saveUsers();
+                System.out.println("✅ Ticket Booked Successfully!");
+                System.out.println(ticket.getTicketInfo()); // ✅ FIX: Ensures ticket details print
+            } catch (IOException e) {
+                System.out.println("⚠ Error saving user after booking: " + e.getMessage());
+            }
+        }
+
+        return ticket;
+    }
+    public boolean cancelBooking(String ticketId) {
+        if (user == null) {
+            System.out.println("⚠ Please login to cancel tickets.");
+            return false;
+        }
+        return TicketUtil.cancelTicket(ticketId, user);
     }
 }
