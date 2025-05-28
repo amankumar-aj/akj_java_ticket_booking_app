@@ -34,9 +34,9 @@ public class App {
         while (option != 7) {
             System.out.println("\n1. Sign Up");
             System.out.println("2. Login");
-            System.out.println("3. Fetch Bookings");
+            System.out.println("3. Book Ticket");
             System.out.println("4. Search Trains");
-            System.out.println("5. Book Ticket");
+            System.out.println("5. Fetch Bookings");
             System.out.println("6. Cancel Ticket");
             System.out.println("7. Exit");
             System.out.print("Choose an option: ");
@@ -80,7 +80,7 @@ public class App {
                     }
                 }
 
-                case 3 -> userBookingService.fetchBooking();
+                case 3 ->  userBookingService.bookTicket(sc);
 
                 case 4 -> {
                     System.out.print("Enter source station: ");
@@ -97,7 +97,7 @@ public class App {
                     }
                 }
 
-                case 5 -> userBookingService.bookTicket(sc);
+                case 5 ->userBookingService.fetchBooking();
 
                 case 6 -> {
                     System.out.print("Enter Ticket ID to cancel: ");
@@ -107,7 +107,7 @@ public class App {
 
                 case 7 -> System.out.println(" Exiting... Thank you for using AJ's E-Ticketing System!");
 
-                default -> System.out.println("❗ Invalid option. Try again.");
+                default -> System.out.println(" Invalid option. Try again.");
             }
         }
 

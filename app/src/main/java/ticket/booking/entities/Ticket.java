@@ -25,7 +25,7 @@ public class Ticket {
     }
 
     private String buildTicketInfo() {
-        return "===== IRCTC TICKET DETAILS =====\n"
+        return "===== TICKET DETAILS =====\n"
                 + "Ticket ID       : " + ticketId + "\n"
                 + "User ID         : " + userId + "\n"
                 + "Passenger Name  : " + name + "\n"

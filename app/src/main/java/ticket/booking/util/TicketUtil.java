@@ -35,7 +35,7 @@ public class TicketUtil {
 
     public static boolean cancelTicket(String ticketId, User user) {
         if (user == null) {
-            System.out.println("⚠ Please login to cancel tickets.");
+            System.out.println(" Please login to cancel tickets.");
             return false;
         }
 
@@ -43,23 +43,23 @@ public class TicketUtil {
         boolean removedFromJson = tickets.removeIf(t -> t.getTicketId().equalsIgnoreCase(ticketId)); // ✅ Ensure removal
 
         if (!removedFromJson) {
-            System.out.println("❌ Ticket not found in system.");
+            System.out.println(" Ticket not found in system.");
             return false;
         }
 
         try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(TICKET_FILE), tickets); // ✅ Fix: Ensure JSON update happens correctly
-            System.out.println("✅ Ticket successfully removed from system.");
+            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(TICKET_FILE), tickets); // Fix: Ensure JSON update happens correctly
+            System.out.println(" Ticket successfully removed from system.");
             return true;
         } catch (IOException e) {
-            System.out.println("⚠ Error updating global ticket storage: " + e.getMessage());
+            System.out.println(" Error updating global ticket storage: " + e.getMessage());
             return false;
         }
     }
 //==========
     private static String generateTicketId() {
-        String random = String.format("%06d", new Random().nextInt(1_000_000));
-        return "AJ" + random + "000000"; // ✅ Fix: Unique Ticket ID generate karega
+        String random = String.format("%06d", new Random().nextInt(1_00));
+        return "AJ" + random + "000000"; //  Unique Ticket ID generate karega
     }
 
     public static Ticket createTicket(User user, String source, String destination, String travelDate, Train train) {

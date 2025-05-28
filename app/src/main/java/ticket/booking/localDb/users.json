@@ -1,9 +1,1 @@
-[
-  {
-    "userId": "03013f15-ccda-424a-b29f-7a2c41f05180",
-    "name": "aman",
-    "password": "aj@123",
-    "hashedPassword": "$2a$10$ThaCG.hW3kI./vH4BhX6les3X72tSM1PZ1Zhc5VqPQiODH6lvhjE.",
-    "ticketsBooked": []
-  }
-]
+[{"userId":"03013f15-ccda-424a-b29f-7a2c41f05180","name":"aman","password":"aj@123","hashedPassword":"$2a$10$ThaCG.hW3kI./vH4BhX6les3X72tSM1PZ1Zhc5VqPQiODH6lvhjE.","ticketsBooked":[]},{"userId":"4674f331-c62e-4519-a460-4c5bd7bb463d","name":"srivastav","password":"aj@123","hashedPassword":"$2a$10$ejtTEsi6pZi/PB.btK.Zh.6EKttyePsMksuXDPlPosIvGg4OipRaK","ticketsBooked":[]}]
