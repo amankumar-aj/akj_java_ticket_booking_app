@@ -32,27 +32,9 @@ A **console-based ticket booking system** built in **Java**, simulating basic ra
 ---
 
 ## 🧱 Project Structure
-ticket.booking/
-│
-├── App.java # Main driver class
-│
-├── entities/
-│ ├── User.java
-│ ├── Train.java
-│ └── Ticket.java
-│
-├── services/
-│ ├── UserBookingService.java
-│ └── TrainServices.java
-│
-├── util/
-│ ├── UserServiceUtil.java
-│ └── TicketUtil.java
-│
-├── data/
-│ ├── users.json
-│ ├── trains.json
-│ └── tickets.json
+
+![Screenshot_2025-06-15-10-00-40-44_40deb401b9ffe8e1df2f1cc5ba480b12](https://github.com/user-attachments/assets/4995d737-9e9c-495d-8180-661694c8c284)
+
 
 ---
 
